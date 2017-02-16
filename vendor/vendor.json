@@ -68,6 +68,12 @@
 			"version": "v0.7.2-rc.1"
 		},
 		{
+			"checksumSHA1": "evtidxvlOG9eHsL+5h8rXSWUzCM=",
+			"path": "github.com/docker/libnetwork/netlabel",
+			"revision": "5537cb4b15c16eff2619db126ead3271e0ab45eb",
+			"revisionTime": "2017-02-14T19:03:07Z"
+		},
+		{
 			"checksumSHA1": "KVZRinwxB3LsuMUkOZw5/U2WgE8=",
 			"path": "github.com/opencontainers/runc/libcontainer/user",
 			"revision": "6b1d0e76f239ffb435445e5ae316d2676c07c6e3",

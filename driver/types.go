@@ -1,11 +1,11 @@
 package driver
 
 import (
-	"github.com/docker/go-plugins-helpers/network"
-	"fmt"
 	"errors"
-	"strconv"
+	"fmt"
+	"github.com/docker/go-plugins-helpers/network"
 	"net"
+	"strconv"
 )
 
 var (
@@ -19,8 +19,6 @@ type Network struct {
 type Endpoint struct {
 	*network.CreateEndpointRequest
 }
-
-
 
 func (n *Network) VlanId() (vlanId int, err error) {
 	const netlabel = "com.docker.network.generic"
@@ -75,7 +73,6 @@ func (n *Network) FindIPv4Data(addr string) (*network.IPAMData, error) {
 	}
 	return nil, fmt.Errorf("cannot find matched subnet: ip=%s network=%s", addr, n.NetworkID)
 }
-
 
 func (e *Endpoint) GenerateMacAddress() {
 	if e.Interface.MacAddress != "" {

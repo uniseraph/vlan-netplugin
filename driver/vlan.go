@@ -1,14 +1,15 @@
 package driver
 
 import (
-	"sync"
-	"github.com/docker/libkv/store"
-	"github.com/omega/vlan-netplugin/nl"
-	"github.com/docker/go-plugins-helpers/network"
 	"errors"
 	"fmt"
-	"net"
+	"github.com/docker/go-plugins-helpers/network"
+	"github.com/docker/libkv/store"
+	"github.com/docker/libnetwork/netlabel"
+	"github.com/omega/vlan-netplugin/nl"
 	"github.com/vishvananda/netlink"
+	"net"
+	"sync"
 )
 
 const (
@@ -43,6 +44,7 @@ func New(option DriverOption) (*Driver, error) {
 		endpoints: Endpoints{option.Store},
 	}, nil
 }
+
 type Driver struct {
 	dev string
 
@@ -53,16 +55,16 @@ type Driver struct {
 }
 
 func (*Driver) GetCapabilities() (*network.CapabilitiesResponse, error) {
-	return  &network.CapabilitiesResponse{
+	return &network.CapabilitiesResponse{
 		Scope: network.GlobalScope,
-	} ,nil
+	}, nil
 }
 
 func (d *Driver) CreateNetwork(r *network.CreateNetworkRequest) error {
 	n := &Network{r}
 
-	_ , err := n.VlanId()
-	if err!=nil {
+	_, err := n.VlanId()
+	if err != nil {
 		return err
 	}
 
@@ -74,45 +76,51 @@ func (*Driver) AllocateNetwork(*network.AllocateNetworkRequest) (*network.Alloca
 	panic("implement me")
 }
 
-func (d *Driver) DeleteNetwork( r *network.DeleteNetworkRequest) error {
+func (d *Driver) DeleteNetwork(r *network.DeleteNetworkRequest) error {
 	if _, err := d.networks.Get(r.NetworkID); err != nil {
 		if err == store.ErrKeyNotFound {
 			return nil
 		}
 		return err
 	}
-	return d.networks.Delete(r.NetworkID)}
+	return d.networks.Delete(r.NetworkID)
+}
 
 func (*Driver) FreeNetwork(*network.FreeNetworkRequest) error {
-return nil
+	return nil
 }
 
 func (d *Driver) CreateEndpoint(r *network.CreateEndpointRequest) (*network.CreateEndpointResponse, error) {
-	var resp network.CreateEndpointResponse
 
 	if r.Interface.Address == "" {
 		return nil, errors.New("CreateEndpointRequest.Interface.Address must be specified")
 	}
 
-	ep := &Endpoint{r}
+	if v, exists := r.Options[netlabel.PortMap]; exists {
+		if pb, ok := v.([]interface{}); ok && len(pb) > 0 {
+			return nil, errors.New(`NetworkDriver "vlan" doesn't support port mapping`)
+		}
+	}
 
+	ep := &Endpoint{r}
 	if ep.Interface.MacAddress == "" {
 		ep.GenerateMacAddress()
-		resp.Interface = &network.EndpointInterface{MacAddress: ep.Interface.MacAddress}
 	}
 
 	if err := d.endpoints.Put(ep); err != nil {
 		return nil, err
 	}
 
-	return &resp, nil
+	return &network.CreateEndpointResponse{
+		Interface: ep.Interface,
+	} ,nil
 
 }
 
 func (d *Driver) DeleteEndpoint(r *network.DeleteEndpointRequest) error {
 
-	_ , err := d.endpoints.Get(r.EndpointID)
-	if err!=nil{
+	_, err := d.endpoints.Get(r.EndpointID)
+	if err != nil {
 		return err
 	}
 
@@ -215,6 +223,9 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		}
 	}()
 
+//	origin := veths[0] //peer in host , vxxxx
+//	local := veths[1]  //peer in container , vvxxx
+
 	if err = nl.Set(
 		veths[0],
 		nl.MacSetter(ep.VethSourceMacAddress()),
@@ -243,26 +254,25 @@ func (d *Driver) Leave(r *network.LeaveRequest) error {
 	d.Lock()
 	defer d.Unlock()
 
-	return nl.DestroyDevice(ep.VethName())}
+	return nl.DestroyDevice(ep.VethName())
+}
 
 func (*Driver) DiscoverNew(*network.DiscoveryNotification) error {
 	return nil
 }
 
 func (*Driver) DiscoverDelete(*network.DiscoveryNotification) error {
-return nil
+	return nil
 }
 
 func (*Driver) ProgramExternalConnectivity(*network.ProgramExternalConnectivityRequest) error {
-return nil
+	return nil
 }
 
 func (*Driver) RevokeExternalConnectivity(*network.RevokeExternalConnectivityRequest) error {
 	return nil
 }
 
-
 func (d *Driver) Type() string {
 	return driverType
 }
-

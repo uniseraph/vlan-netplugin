@@ -23,6 +23,7 @@ image:
 	docker build --rm -t ${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION} IMAGEBUILD
 	docker tag ${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION} ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION}
 	docker tag ${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION} ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}
+	docker tag ${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION} ${IMAGE_NAME}:${MAJOR_VERSION}
 	rm -rf IMAGEBUILD
 
 local:
@@ -31,6 +32,10 @@ local:
 	mv ${TARGET} bundles/${MAJOR_VERSION}/binary
 	@cd bundles/${MAJOR_VERSION}/binary && $(shell which md5sum) -b ${TARGET} | cut -d' ' -f1  > ${TARGET}.md5
 
+push:
+	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION}
+	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}
+default: build
+all: build image push
 
-
-.PHONY: build local image
+.PHONY: build local image push

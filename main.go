@@ -3,15 +3,15 @@ package main
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/docker/libkv/store/zookeeper"
-	"os"
-	"net/url"
-	"github.com/docker/libkv"
-	"strings"
-	"github.com/docker/libkv/store"
-	"github.com/omega/vlan-netplugin/driver"
 	"github.com/docker/go-plugins-helpers/network"
+	"github.com/docker/libkv"
+	"github.com/docker/libkv/store"
+	"github.com/docker/libkv/store/zookeeper"
+	"github.com/omega/vlan-netplugin/driver"
 	"github.com/opencontainers/runc/libcontainer/user"
+	"net/url"
+	"os"
+	"strings"
 )
 
 var Version string
@@ -72,30 +72,28 @@ func main() {
 
 				clusterStore := c.String("cluster-store")
 				url, err := url.Parse(clusterStore)
-				if err!=nil{
+				if err != nil {
 					return err
 				}
 
-				s , err := libkv.NewStore( store.Backend(url.Scheme),strings.Split(url.Host,","),nil)
-				if err!=nil {
+				s, err := libkv.NewStore(store.Backend(url.Scheme), strings.Split(url.Host, ","), nil)
+				if err != nil {
 					return err
 				}
-
 
 				d, err := driver.New(driver.DriverOption{Store: s, Prefix: url.Path, ParentEth: c.String("parent-eth")})
 				if err != nil {
 					return err
 				}
 
-				group , err := user.CurrentGroup()
-				if err!=nil{
+				group, err := user.CurrentGroup()
+				if err != nil {
 					return nil
 				}
 
 				if err := network.NewHandler(d).ServeUnix("root", group.Gid); err != nil {
 					return err
 				}
-
 
 				return nil
 			},
