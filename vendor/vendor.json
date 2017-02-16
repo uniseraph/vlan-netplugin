@@ -1,0 +1,78 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "L9njXCkN30+qHaLayiiA2Q9jDlY=",
+			"path": "github.com/Microsoft/go-winio",
+			"revision": "fff283ad5116362ca252298cfc9b95828956d85d",
+			"revisionTime": "2017-02-01T00:43:30Z"
+		},
+		{
+			"checksumSHA1": "XFl7nlkh1EUa3RvYEsT8Q4O1Mvc=",
+			"path": "github.com/Sirupsen/logrus",
+			"revision": "7f4b1adc791766938c29457bed0703fb9134421a",
+			"revisionTime": "2017-02-15T16:43:24Z"
+		},
+		{
+			"checksumSHA1": "bplZOqTp6JAbkn25zHEPIob25WI=",
+			"path": "github.com/codegangsta/cli",
+			"revision": "2526b57c56f30b50466c96c4133b1a4ad0f0191f",
+			"revisionTime": "2017-02-15T05:17:05Z"
+		},
+		{
+			"checksumSHA1": "RBwpnMpfQt7Jo7YWrRph0Vwe+f0=",
+			"path": "github.com/coreos/go-systemd/activation",
+			"revision": "e97b35f834b17eaa82afe3d44715c34736bfa12b",
+			"revisionTime": "2017-02-01T10:47:36Z"
+		},
+		{
+			"checksumSHA1": "jUfDG3VQsA2UZHvvIXncgiddpYA=",
+			"path": "github.com/docker/go-connections/sockets",
+			"revision": "7da10c8c50cad14494ec818dcdfb6506265c0086",
+			"revisionTime": "2017-02-03T23:56:24Z"
+		},
+		{
+			"checksumSHA1": "O8CWhk39rLpO38BIrEa7TKPSIGE=",
+			"path": "github.com/docker/go-plugins-helpers/network",
+			"revision": "8af45ff6ad5b7608853de51133c33e6638b02134",
+			"revisionTime": "2017-01-30T18:14:55Z"
+		},
+		{
+			"checksumSHA1": "9/gpnQVuH/eszYpzCGeG1AtOdMM=",
+			"path": "github.com/docker/go-plugins-helpers/sdk",
+			"revision": "8af45ff6ad5b7608853de51133c33e6638b02134",
+			"revisionTime": "2017-01-30T18:14:55Z"
+		},
+		{
+			"origin": "gitlab.alipay-inc.com/acs/libkv",
+			"path": "github.com/docker/libkv",
+			"revision": "acs-patches",
+			"version": "acs-patches"
+		},
+		{
+			"path": "github.com/docker/libnetwork",
+			"revision": "v0.7.2-rc.1",
+			"version": "v0.7.2-rc.1"
+		},
+		{
+			"checksumSHA1": "fjMK2G5arnjllpoeBYeyf9Y2Iok=",
+			"path": "golang.org/x/net/proxy",
+			"revision": "b4690f45fa1cafc47b1c280c2e75116efe40cc13",
+			"revisionTime": "2017-02-15T08:41:58Z"
+		},
+		{
+			"checksumSHA1": "rTPzsn0jeqfgnQR0OsMKR8JRy5Y=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "e24f485414aeafb646f6fca458b0bf869c0880a1",
+			"revisionTime": "2017-02-11T02:03:03Z"
+		},
+		{
+			"checksumSHA1": "kQB2wRB3twjUp615F6zEwGHjNe0=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "e24f485414aeafb646f6fca458b0bf869c0880a1",
+			"revisionTime": "2017-02-11T02:03:03Z"
+		}
+	],
+	"rootPath": "github.com/omega/omega-vlan-netplugin"
+}
