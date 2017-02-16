@@ -51,6 +51,18 @@
 			"version": "acs-patches"
 		},
 		{
+			"origin": "gitlab.alipay-inc.com/acs/libkv/store",
+			"path": "github.com/docker/libkv/store",
+			"revision": "acs-patches",
+			"version": "acs-patches"
+		},
+		{
+			"origin": "gitlab.alipay-inc.com/acs/libkv/store/zookeeper",
+			"path": "github.com/docker/libkv/store/zookeeper",
+			"revision": "acs-patches",
+			"version": "acs-patches"
+		},
+		{
 			"path": "github.com/docker/libnetwork",
 			"revision": "v0.7.2-rc.1",
 			"version": "v0.7.2-rc.1"
