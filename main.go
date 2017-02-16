@@ -1,24 +1,28 @@
 package main
 
 import (
-	"github.com/docker/libkv/store/zookeeper"
-	"github.com/codegangsta/cli"
-	"os"
 	"github.com/Sirupsen/logrus"
+	"github.com/codegangsta/cli"
+	"github.com/docker/libkv/store/zookeeper"
+	"os"
+	"net/url"
+	"github.com/docker/libkv"
+	"strings"
+	"github.com/docker/libkv/store"
+	"github.com/omega/vlan-netplugin/driver"
+	"github.com/docker/go-plugins-helpers/network"
+	"github.com/opencontainers/runc/libcontainer/user"
 )
-
 
 var Version string
 
 func init() {
 
-
 	zookeeper.Register()
 
 }
 
-
-func main()  {
+func main() {
 
 	app := cli.NewApp()
 	app.Usage = "Network driver for Docker"
@@ -46,10 +50,56 @@ func main()  {
 		return nil
 	}
 
+	app.Commands = []cli.Command{
+		{
+			Name:  "start",
+			Usage: "start a vlan netplugin ",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "cluster-store",
+					EnvVar: "NP_CLUSTER_STORE",
+					Value:  "zk://localhost:2181",
+					Usage:  "Set the cluster store",
+				},
+				cli.StringFlag{
+					Name:   "parent-eth",
+					EnvVar: "NP_ETH",
+					Value:  "eth0",
+					Usage:  "Set the parent eth for vlan device",
+				},
+			},
+			Action: func(c *cli.Context) error {
 
-	app.Action = func(c *cli.Context) error {
+				clusterStore := c.String("cluster-store")
+				url, err := url.Parse(clusterStore)
+				if err!=nil{
+					return err
+				}
 
-		return nil
+				s , err := libkv.NewStore( store.Backend(url.Scheme),strings.Split(url.Host,","),nil)
+				if err!=nil {
+					return err
+				}
+
+
+				d, err := driver.New(driver.DriverOption{Store: s, Prefix: url.Path, ParentEth: c.String("parent-eth")})
+				if err != nil {
+					return err
+				}
+
+				group , err := user.CurrentGroup()
+				if err!=nil{
+					return nil
+				}
+
+				if err := network.NewHandler(d).ServeUnix("root", group.Gid); err != nil {
+					return err
+				}
+
+
+				return nil
+			},
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {

@@ -56,6 +56,36 @@
 			"version": "v0.7.2-rc.1"
 		},
 		{
+			"checksumSHA1": "KVZRinwxB3LsuMUkOZw5/U2WgE8=",
+			"path": "github.com/opencontainers/runc/libcontainer/user",
+			"revision": "6b1d0e76f239ffb435445e5ae316d2676c07c6e3",
+			"revisionTime": "2017-02-16T01:51:23Z"
+		},
+		{
+			"checksumSHA1": "5SYLEhADhdBVZAGPVHWggQl7H8k=",
+			"path": "github.com/samuel/go-zookeeper/zk",
+			"revision": "1d7be4effb13d2d908342d349d71a284a7542693",
+			"revisionTime": "2016-10-28T23:23:40Z"
+		},
+		{
+			"checksumSHA1": "H7NaDOZsJadsVTBhu3Vy3OMQziQ=",
+			"path": "github.com/vishvananda/netlink",
+			"revision": "87909c6dada5cba3aa659144a40b1e575d79d625",
+			"revisionTime": "2016-08-22T02:40:27Z"
+		},
+		{
+			"checksumSHA1": "zkLVTC6aGH2iS+uWXGZCXINc81Y=",
+			"path": "github.com/vishvananda/netlink/nl",
+			"revision": "87909c6dada5cba3aa659144a40b1e575d79d625",
+			"revisionTime": "2016-08-22T02:40:27Z"
+		},
+		{
+			"checksumSHA1": "i13is+0a52xNtPwq1GP0gKJjb54=",
+			"path": "github.com/vishvananda/netns",
+			"revision": "2c9454e4fc6e2edc1a1c84e64ed3d6e662fb6991",
+			"revisionTime": "2016-12-19T07:29:00Z"
+		},
+		{
 			"checksumSHA1": "fjMK2G5arnjllpoeBYeyf9Y2Iok=",
 			"path": "golang.org/x/net/proxy",
 			"revision": "b4690f45fa1cafc47b1c280c2e75116efe40cc13",
@@ -74,5 +104,5 @@
 			"revisionTime": "2017-02-11T02:03:03Z"
 		}
 	],
-	"rootPath": "github.com/omega/omega-vlan-netplugin"
+	"rootPath": "github.com/omega/vlan-netplugin"
 }
