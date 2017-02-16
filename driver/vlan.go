@@ -6,6 +6,9 @@ import (
 	"github.com/omega/vlan-netplugin/nl"
 	"github.com/docker/go-plugins-helpers/network"
 	"errors"
+	"fmt"
+	"net"
+	"github.com/vishvananda/netlink"
 )
 
 const (
@@ -135,13 +138,112 @@ func (d *Driver) EndpointInfo(r *network.InfoRequest) (*network.InfoResponse, er
 	return &resp, nil
 }
 
-func (*Driver) Join(*network.JoinRequest) (*network.JoinResponse, error) {
-	panic("implement me")
+func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
+	var err error
+
+	n, err := d.networks.Get(r.NetworkID)
+	if err != nil {
+		return nil, err
+	}
+	vlanId, err := n.VlanId()
+	if err != nil {
+		return nil, err
+	}
+
+	vlanName := func() string {
+		return fmt.Sprintf("%s.%d", d.dev, vlanId)
+	}
+	bridgeName := func() string {
+		return fmt.Sprintf("br0.%d", vlanId)
+	}
+
+	ep, err := d.endpoints.Get(r.EndpointID)
+	if err != nil {
+		return nil, err
+	}
+	ipv4data, err := n.FindIPv4Data(ep.Interface.Address)
+	if err != nil {
+		return nil, err
+	}
+	gateway, _, err := net.ParseCIDR(ipv4data.Gateway)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Lock()
+	defer d.Unlock()
+
+	vlanDev, err := nl.CreateVlan(d.dev, vlanId, vlanName())
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			nl.DestroyDevice(vlanName())
+		}
+	}()
+
+	bridgeDev, err := nl.CreateBridge(bridgeName())
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			nl.DestroyDevice(bridgeName())
+		}
+	}()
+
+	linkSetUp := nl.UpSetter()
+	for _, link := range []netlink.Link{bridgeDev, vlanDev} {
+		if err = linkSetUp(link); err != nil {
+			return nil, err
+		}
+	}
+
+	linkSetMaster := nl.JoinNetworkSetter(bridgeDev)
+	if err = linkSetMaster(vlanDev); err != nil {
+		return nil, err
+	}
+
+	veths, err := nl.CreateVethPeer(ep.VethName())
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			nl.DestroyDevice(veths[0].Attrs().Name)
+		}
+	}()
+
+	if err = nl.Set(
+		veths[0],
+		nl.MacSetter(ep.VethSourceMacAddress()),
+		nl.JoinNetworkSetter(bridgeDev),
+		nl.UpSetter(),
+	); err != nil {
+		return nil, err
+	}
+
+	if err = nl.Set(veths[1], nl.MacSetter(ep.VethDstMacAddress())); err != nil {
+		return nil, err
+	}
+
+	return &network.JoinResponse{
+		InterfaceName: network.InterfaceName{veths[1].Attrs().Name, "eth"},
+		Gateway:       gateway.String(),
+	}, nil
 }
 
-func (*Driver) Leave(*network.LeaveRequest) error {
-	panic("implement me")
-}
+func (d *Driver) Leave(r *network.LeaveRequest) error {
+	ep, err := d.endpoints.Get(r.EndpointID)
+	if err != nil {
+		return err
+	}
+
+	d.Lock()
+	defer d.Unlock()
+
+	return nl.DestroyDevice(ep.VethName())}
 
 func (*Driver) DiscoverNew(*network.DiscoveryNotification) error {
 	return nil
