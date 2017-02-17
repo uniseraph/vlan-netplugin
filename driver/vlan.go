@@ -10,6 +10,7 @@ import (
 	"github.com/vishvananda/netlink"
 	"net"
 	"sync"
+	"github.com/contiv/ofnet/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 const (
@@ -91,6 +92,8 @@ func (*Driver) FreeNetwork(*network.FreeNetworkRequest) error {
 }
 
 func (d *Driver) CreateEndpoint(r *network.CreateEndpointRequest) (*network.CreateEndpointResponse, error) {
+
+	logrus.Info("Create a endpoint ")
 
 	if r.Interface.Address == "" {
 		return nil, errors.New("CreateEndpointRequest.Interface.Address must be specified")
