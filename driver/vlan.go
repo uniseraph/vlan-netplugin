@@ -116,8 +116,8 @@ func (d *Driver) CreateEndpoint(r *network.CreateEndpointRequest) (*network.Crea
 
 	return &network.CreateEndpointResponse{
 		Interface: &network.EndpointInterface{
-			Address: ep.Interface.Address,
-			AddressIPv6: ep.Interface.AddressIPv6,
+			//Address: ep.Interface.Address,
+			//AddressIPv6: ep.Interface.AddressIPv6,
 			MacAddress: ep.Interface.MacAddress,
 		} ,
 	} ,nil
