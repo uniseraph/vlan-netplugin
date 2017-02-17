@@ -86,7 +86,7 @@ func (e *Endpoint) GenerateMacAddress() {
 
 	ip , _,_ := net.ParseCIDR(e.Interface.Address)
 
-	copy(hw[2:], ip)
+	copy(hw[2:], ip.To4())
 	e.Interface.MacAddress = hw.String()
 }
 
