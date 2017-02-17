@@ -73,7 +73,7 @@ func (d *Driver) CreateNetwork(r *network.CreateNetworkRequest) error {
 }
 
 func (*Driver) AllocateNetwork(*network.AllocateNetworkRequest) (*network.AllocateNetworkResponse, error) {
-	panic("implement me")
+	return &network.AllocateNetworkResponse{}, nil
 }
 
 func (d *Driver) DeleteNetwork(r *network.DeleteNetworkRequest) error {
@@ -112,7 +112,11 @@ func (d *Driver) CreateEndpoint(r *network.CreateEndpointRequest) (*network.Crea
 	}
 
 	return &network.CreateEndpointResponse{
-		Interface: ep.Interface,
+		Interface: &network.EndpointInterface{
+			Address: ep.Interface.Address,
+			AddressIPv6: ep.Interface.AddressIPv6,
+			MacAddress: ep.Interface.MacAddress,
+		} ,
 	} ,nil
 
 }
