@@ -188,12 +188,13 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 	d.Lock()
 	defer d.Unlock()
 
-	_ , err = nl.CreateVlan(d.dev, vlanId, vlanName)
+	vlanDev, err := nl.CreateVlan(d.dev, vlanId, vlanName)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
 		if err != nil {
+			logrus.Debug("destory vlan:%s" , vlanDev.Attrs().Name)
 			nl.DestroyDevice(vlanName)
 		}
 	}()
@@ -215,7 +216,7 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 	local := veths[1]  //peer in container , vvxxx
 
 	if err = nl.Set(
-		veths[0],
+		origin,
 		nl.MacSetter(ep.VethSourceMacAddress()),
 		nl.UpSetter(),
 	); err != nil {
@@ -226,42 +227,38 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		return nil, err
 	}
 
+	dpif , err := odp.NewDpif()
+	if err!=nil{
+		return nil , err
+	}
+	defer dpif.Close()
 
 	datapathName := fmt.Sprintf("datapath.%d",vlanId)
-	dp , err := ovs.CreateDatapath(datapathName)
+	dp , err := ovs.CreateDatapath(dpif, datapathName)
 	if err!=nil {
 		logrus.Infof("create datapath %s error:%s" , datapathName, err.Error())
 
 		return nil ,err
 	}
+
 	defer func(){
 		if err!=nil {
-			dp.Delete()   //TODO
+			dp.Delete()   //TODO log
 		}
 	}()
 	// add origin to datapath
-
 	port1 , err := dp.CreateVport(odp.NewNetdevVportSpec(origin.Attrs().Name))
 	if err !=nil {
+		logrus.Infof("create vport:%s id:%d error:%s" , origin.Attrs().Name,port1, err.Error())
 		return nil , err
 	}
-	defer func(){
-		logrus.Infof("create vport  %s error:%s" , origin.Attrs().Name, err.Error())
-
-		dp.DeleteVport(port1)
-	}()
 
 	// add vlan to datapath
-
 	port2 , err := dp.CreateVport( odp.NewNetdevVportSpec(vlanName))
 	if err!= nil{
+		logrus.Infof("create vport:%s id:%d error:%s" , vlanName, port2, err.Error())
 		return nil , err
 	}
-	defer func(){
-		logrus.Infof("create vport  %s error:%s" , vlanName,  err.Error())
-
-		dp.DeleteVport(port2)
-	}()
 
 
 	return &network.JoinResponse{
@@ -278,6 +275,15 @@ func (d *Driver) Leave(r *network.LeaveRequest) error {
 
 	d.Lock()
 	defer d.Unlock()
+
+
+	dpif , err := odp.NewDpif()
+	if err!=nil{
+		return err
+	}
+	defer dpif.Close()
+
+
 
 	return nl.DestroyDevice(ep.VethName())
 }

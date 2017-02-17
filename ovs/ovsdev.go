@@ -2,13 +2,7 @@ package ovs
 
 import "github.com/weaveworks/go-odp/odp"
 
-func  CreateDatapath(name string) (odp.DatapathHandle,error) {
-
-	dpif , err :=  odp.NewDpif()
-	if err!=nil{
-		return odp.DatapathHandle{},err
-	}
-	defer dpif.Close()
+func  CreateDatapath(dpif *odp.Dpif , name string) (odp.DatapathHandle,error) {
 
 
 	handler , err := dpif.CreateDatapath(name)
