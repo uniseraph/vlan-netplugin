@@ -104,6 +104,12 @@
 			"revisionTime": "2016-12-19T07:29:00Z"
 		},
 		{
+			"checksumSHA1": "sG7XjMRqdJom9Xm5Jb1dN8+EzqM=",
+			"path": "github.com/weaveworks/go-odp/odp",
+			"revision": "eec09c2fbfb96be47bfe11165ce300ad9a60bef5",
+			"revisionTime": "2016-08-23T14:01:54Z"
+		},
+		{
 			"checksumSHA1": "fjMK2G5arnjllpoeBYeyf9Y2Iok=",
 			"path": "golang.org/x/net/proxy",
 			"revision": "b4690f45fa1cafc47b1c280c2e75116efe40cc13",
