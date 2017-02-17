@@ -1,5 +1,5 @@
-#FROM alpine:3.4
-FROM socketplane/busybox
+FROM alpine:3.4
+#FROM socketplane/busybox
 
 ADD ./vlan-netplugin /usr/bin
 
