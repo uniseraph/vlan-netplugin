@@ -91,7 +91,7 @@ func main() {
 					return nil
 				}
 
-				if err := network.NewHandler(d).ServeUnix("root", group.Gid); err != nil {
+				if err := network.NewHandler(d).ServeUnix("vlan", group.Gid); err != nil {
 					return err
 				}
 
