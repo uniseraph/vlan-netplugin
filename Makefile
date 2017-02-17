@@ -14,6 +14,9 @@ BUILD_IMAGE     = golang:1.7.5
 IMAGE_NAME = omega/vlan-netplugin
 REGISTRY = registry.cn-hangzhou.aliyuncs.com
 
+
+
+
 build:
 	docker run --rm -v $(shell pwd):/go/src/${PROJECT_NAME} -w /go/src/${PROJECT_NAME} ${BUILD_IMAGE} make local
 
@@ -35,6 +38,9 @@ local:
 push:
 	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION}
 	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}
+run:
+	docker run -ti --rm -v $(pwd):$(pwd) -v /var/run/docker.sock:/var/run/docker.sock -w $(pwd) -e DOCKER_HOST=unix:///var/run/docker.sock docker/compose:1.9.0 up -d
+
 default: build
 all: build image push
 
