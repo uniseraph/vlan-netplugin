@@ -230,6 +230,8 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 	datapathName := fmt.Sprintf("datapath.%d",vlanId)
 	dp , err := ovs.CreateDatapath(datapathName)
 	if err!=nil {
+		logrus.Infof("create datapath %s error:%s" , datapathName, err.Error())
+
 		return nil ,err
 	}
 	defer func(){
@@ -244,6 +246,8 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		return nil , err
 	}
 	defer func(){
+		logrus.Infof("create vport  %s error:%s" , origin.Attrs().Name, err.Error())
+
 		dp.DeleteVport(port1)
 	}()
 
@@ -254,6 +258,8 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		return nil , err
 	}
 	defer func(){
+		logrus.Infof("create vport  %s error:%s" , vlanName,  err.Error())
+
 		dp.DeleteVport(port2)
 	}()
 
