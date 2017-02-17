@@ -39,7 +39,7 @@ push:
 	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}-${GIT_VERSION}
 	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}
 run: build image
-	docker run -ti --rm -v $(shell pwd):$(shell pwd) -v /var/run/docker.sock:/var/run/docker.sock -w $(pwd) -e DOCKER_HOST=unix:///var/run/docker.sock docker/compose:1.9.0 up -d
+	docker run -ti --rm -v $(shell pwd):$(shell pwd) -v /var/run/docker.sock:/var/run/docker.sock -w $(shell pwd) -e DOCKER_HOST=unix:///var/run/docker.sock docker/compose:1.9.0 up -d
 
 default:
 all: build image push
