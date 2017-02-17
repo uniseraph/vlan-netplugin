@@ -6,7 +6,7 @@ import (
 	"github.com/docker/go-plugins-helpers/network"
 	"net"
 	"strconv"
-	"github.com/coreos/flannel/pkg/ip"
+
 )
 
 var (
