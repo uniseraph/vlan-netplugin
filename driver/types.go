@@ -6,6 +6,7 @@ import (
 	"github.com/docker/go-plugins-helpers/network"
 	"net"
 	"strconv"
+	"github.com/coreos/flannel/pkg/ip"
 )
 
 var (
@@ -82,7 +83,10 @@ func (e *Endpoint) GenerateMacAddress() {
 	hw := make(net.HardwareAddr, 6)
 	hw[0] = 0x7a
 	hw[1] = 0x42
-	copy(hw[2:], net.ParseIP(e.Interface.Address).To4())
+
+	ip , _,_ := net.ParseCIDR(e.Interface.Address)
+
+	copy(hw[2:], ip)
 	e.Interface.MacAddress = hw.String()
 }
 
