@@ -15,8 +15,8 @@ IMAGE_NAME = omega/vlan-netplugin
 REGISTRY = registry.cn-hangzhou.aliyuncs.com
 
 
-
-
+pull:
+	git pull
 build:
 	docker run --rm -v $(shell pwd):/go/src/${PROJECT_NAME} -w /go/src/${PROJECT_NAME} ${BUILD_IMAGE} make local
 
