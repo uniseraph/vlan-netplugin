@@ -149,6 +149,8 @@ func CreateBridge(bridgeName string) (*netlink.Bridge, error) {
 	return bridge.(*netlink.Bridge), nil
 }
 
+
+
 func GetDevicesAttachedOnBridge(bridgeName string) ([]string, error) {
 	iface, err := netlink.LinkByName(bridgeName)
 	if err != nil {

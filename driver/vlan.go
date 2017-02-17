@@ -7,10 +7,11 @@ import (
 	"github.com/docker/libkv/store"
 	"github.com/docker/libnetwork/netlabel"
 	"github.com/omega/vlan-netplugin/nl"
-	"github.com/vishvananda/netlink"
 	"net"
 	"sync"
 	"github.com/Sirupsen/logrus"
+	"github.com/omega/vlan-netplugin/ovs"
+	"github.com/weaveworks/go-odp/odp"
 )
 
 const (
@@ -165,12 +166,11 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		return nil, err
 	}
 
-	vlanName := func() string {
-		return fmt.Sprintf("%s.%d", d.dev, vlanId)
-	}
-	bridgeName := func() string {
-		return fmt.Sprintf("br0.%d", vlanId)
-	}
+	vlanName := fmt.Sprintf("%s.%d", d.dev, vlanId)
+
+	//bridgeName := func() string {
+	//	return fmt.Sprintf("br0.%d", vlanId)
+	//}
 
 	ep, err := d.endpoints.Get(r.EndpointID)
 	if err != nil {
@@ -188,37 +188,18 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 	d.Lock()
 	defer d.Unlock()
 
-	vlanDev, err := nl.CreateVlan(d.dev, vlanId, vlanName())
+	_ , err = nl.CreateVlan(d.dev, vlanId, vlanName)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
 		if err != nil {
-			nl.DestroyDevice(vlanName())
+			nl.DestroyDevice(vlanName)
 		}
 	}()
 
-	bridgeDev, err := nl.CreateBridge(bridgeName())
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err != nil {
-			nl.DestroyDevice(bridgeName())
-		}
-	}()
 
-	linkSetUp := nl.UpSetter()
-	for _, link := range []netlink.Link{bridgeDev, vlanDev} {
-		if err = linkSetUp(link); err != nil {
-			return nil, err
-		}
-	}
 
-	linkSetMaster := nl.JoinNetworkSetter(bridgeDev)
-	if err = linkSetMaster(vlanDev); err != nil {
-		return nil, err
-	}
 
 	veths, err := nl.CreateVethPeer(ep.VethName())
 	if err != nil {
@@ -230,13 +211,12 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		}
 	}()
 
-//	origin := veths[0] //peer in host , vxxxx
-//	local := veths[1]  //peer in container , vvxxx
+	origin := veths[0] //peer in host , vxxxx
+	local := veths[1]  //peer in container , vvxxx
 
 	if err = nl.Set(
 		veths[0],
 		nl.MacSetter(ep.VethSourceMacAddress()),
-		nl.JoinNetworkSetter(bridgeDev),
 		nl.UpSetter(),
 	); err != nil {
 		return nil, err
@@ -246,8 +226,40 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		return nil, err
 	}
 
+
+	datapathName := fmt.Sprintf("datapath.%d",vlanId)
+	dp , err := ovs.CreateDatapath(datapathName)
+	if err!=nil {
+		return nil ,err
+	}
+	defer func(){
+		if err!=nil {
+			dp.Delete()   //TODO
+		}
+	}()
+	// add origin to datapath
+
+	port1 , err := dp.CreateVport(odp.NewNetdevVportSpec(origin.Attrs().Name))
+	if err !=nil {
+		return nil , err
+	}
+	defer func(){
+		dp.DeleteVport(port1)
+	}()
+
+	// add vlan to datapath
+
+	port2 , err := dp.CreateVport( odp.NewNetdevVportSpec(vlanName))
+	if err!= nil{
+		return nil , err
+	}
+	defer func(){
+		dp.DeleteVport(port2)
+	}()
+
+
 	return &network.JoinResponse{
-		InterfaceName: network.InterfaceName{veths[1].Attrs().Name, "eth"},
+		InterfaceName: network.InterfaceName{local.Attrs().Name, "eth"},
 		Gateway:       gateway.String(),
 	}, nil
 }

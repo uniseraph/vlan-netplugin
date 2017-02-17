@@ -1,5 +1,5 @@
 vlan:
-  image: omega/vlan-netplugin:0.0.1
+  image: omega/vlan-netplugin:0.2.0
   command: start
   net: host
   privileged: true
