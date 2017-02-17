@@ -10,7 +10,7 @@ import (
 	"github.com/vishvananda/netlink"
 	"net"
 	"sync"
-	"github.com/contiv/ofnet/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 )
 
 const (
