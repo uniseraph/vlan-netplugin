@@ -3,6 +3,7 @@ package driver
 import (
 	"errors"
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/docker/go-plugins-helpers/network"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libnetwork/netlabel"
@@ -10,7 +11,6 @@ import (
 	"github.com/vishvananda/netlink"
 	"net"
 	"sync"
-	"github.com/Sirupsen/logrus"
 )
 
 const (
@@ -21,6 +21,7 @@ type DriverOption struct {
 	Store     store.Store
 	Prefix    string
 	ParentEth string
+	SendArp   bool
 }
 
 func (o DriverOption) Eth() (dev string, err error) {
@@ -43,12 +44,13 @@ func New(option DriverOption) (*Driver, error) {
 		dev:       dev,
 		networks:  Networks{option.Store},
 		endpoints: Endpoints{option.Store},
+		sendArp:   option.SendArp,
 	}, nil
 }
 
 type Driver struct {
-	dev string
-
+	dev       string
+	sendArp   bool
 	networks  Networks
 	endpoints Endpoints
 
@@ -119,8 +121,8 @@ func (d *Driver) CreateEndpoint(r *network.CreateEndpointRequest) (*network.Crea
 			//Address: ep.Interface.Address,
 			//AddressIPv6: ep.Interface.AddressIPv6,
 			MacAddress: ep.Interface.MacAddress,
-		} ,
-	} ,nil
+		},
+	}, nil
 
 }
 
@@ -230,8 +232,8 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 		}
 	}()
 
-//	origin := veths[0] //peer in host , vxxxx
-//	local := veths[1]  //peer in container , vvxxx
+	//	origin := veths[0] //peer in host , vxxxx
+	//	local := veths[1]  //peer in container , vvxxx
 
 	if err = nl.Set(
 		veths[0],
@@ -244,6 +246,17 @@ func (d *Driver) Join(r *network.JoinRequest) (*network.JoinResponse, error) {
 
 	if err = nl.Set(veths[1], nl.MacSetter(ep.VethDstMacAddress())); err != nil {
 		return nil, err
+	}
+
+	if d.sendArp {
+		cip, _, arpErr := net.ParseCIDR(ep.Interface.Address)
+		if arpErr != nil {
+			return nil, err
+		}
+
+		if arpErr := nl.SendArpRequest(ep.VethDstMacAddress(), cip, gateway, d.dev, vlanId); arpErr != nil {
+			logrus.WithFields(logrus.Fields{"container ip": cip, "gateway": gateway, "err": arpErr}).Info("send arp error ")
+		}
 	}
 
 	return &network.JoinResponse{

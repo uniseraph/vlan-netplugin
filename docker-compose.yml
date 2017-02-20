@@ -3,7 +3,7 @@ services:
  vlan:
   image: omega/vlan-netplugin:0.1.0
   command: start
-  net: host
+  network: host
   privileged: true
   pid : host
   environment:

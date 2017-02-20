@@ -67,25 +67,34 @@ func main() {
 					Value:  "eth0",
 					Usage:  "Set the parent eth for vlan device",
 				},
+				cli.BoolTFlag{
+					Name:   "send-arp",
+					EnvVar: "NP_SEND_ARP",
+					Usage:  "send a request arp to the container's gateway",
+				},
 			},
 			Action: func(c *cli.Context) error {
 
 				clusterStore := c.String("cluster-store")
 				url, err := url.Parse(clusterStore)
 				if err != nil {
-					logrus.Info("parse cluster-store:%s fail , error:%s" , clusterStore,err.Error())
+					logrus.Info("parse cluster-store:%s fail , error:%s", clusterStore, err.Error())
 					return err
 				}
 
 				s, err := libkv.NewStore(store.Backend(url.Scheme), strings.Split(url.Host, ","), nil)
 				if err != nil {
-					logrus.Info("connect cluster-store:%s  fail , error:%s" , clusterStore,err.Error())
+					logrus.Info("connect cluster-store:%s  fail , error:%s", clusterStore, err.Error())
 					return err
 				}
 
-				d, err := driver.New(driver.DriverOption{Store: s, Prefix: url.Path, ParentEth: c.String("parent-eth")})
+				d, err := driver.New(driver.DriverOption{Store: s,
+					Prefix:    url.Path,
+					ParentEth: c.String("parent-eth"),
+					SendArp:   c.Bool("send-arp"),
+				})
 				if err != nil {
-					logrus.WithFields(logrus.Fields{ "store":s , "prefix":url.Path , "parenteth":c.String("parent-eth")  }).Info("new vlan driver error ,error is %s")
+					logrus.WithFields(logrus.Fields{"store": s, "prefix": url.Path, "parenteth": c.String("parent-eth")}).Info("new vlan driver error ,error is %s")
 					return err
 				}
 
