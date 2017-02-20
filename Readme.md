@@ -34,6 +34,10 @@ make build image
 
 * 运行（容器方式）
 ```
+    make run  ClUSTER_STORE=zk://localhost:2181 TRUNK_DEV=eth0
+```
+CLUSTER_STORE 和 TRUNK_DEV有默认值，上述命令相当于
+```
     make run
 ```
 
