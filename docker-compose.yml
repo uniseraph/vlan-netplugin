@@ -1,5 +1,5 @@
 vlan:
-  image: omega/vlan-netplugin:0.0.1
+  image: omega/vlan-netplugin:0.1.0
   command: start
   net: host
   privileged: true
@@ -7,7 +7,7 @@ vlan:
   environment:
     - "affinity:container!=*vlan*"
     - NP_CLUSTER_STORE=zk://localhost:2181
-    - NP_ETH=eth0
+    - NP_ETH=bond0.22
     - LOG_LEVEL=debug
   restart: always
   volumes:

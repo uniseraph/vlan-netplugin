@@ -73,16 +73,19 @@ func main() {
 				clusterStore := c.String("cluster-store")
 				url, err := url.Parse(clusterStore)
 				if err != nil {
+					logrus.Info("parse cluster-store:%s fail , error:%s" , clusterStore,err.Error())
 					return err
 				}
 
 				s, err := libkv.NewStore(store.Backend(url.Scheme), strings.Split(url.Host, ","), nil)
 				if err != nil {
+					logrus.Info("connect cluster-store:%s  fail , error:%s" , clusterStore,err.Error())
 					return err
 				}
 
 				d, err := driver.New(driver.DriverOption{Store: s, Prefix: url.Path, ParentEth: c.String("parent-eth")})
 				if err != nil {
+					logrus.WithFields(logrus.Fields{ "store":s , "prefix":url.Path , "parenteth":c.String("parent-eth")  }).Info("new vlan driver error ,error is %s")
 					return err
 				}
 
