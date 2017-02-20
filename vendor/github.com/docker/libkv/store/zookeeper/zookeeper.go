@@ -92,14 +92,19 @@ func (s *Zookeeper) Get(key string) (pair *store.KVPair, err error) {
 
 // createFullPath creates the entire path for a directory
 // that does not exist
-func (s *Zookeeper) createFullPath(path []string, ephemeral bool) error {
+func (s *Zookeeper) createFullPath(path []string, value []byte, ephemeral bool) error {
+	data := []byte{}
 	for i := 1; i <= len(path); i++ {
 		newpath := "/" + strings.Join(path[:i], "/")
 		if i == len(path) && ephemeral {
-			_, err := s.client.Create(newpath, []byte{}, zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
+			_, err := s.client.Create(newpath, value, zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
 			return err
 		}
-		_, err := s.client.Create(newpath, []byte{}, 0, zk.WorldACL(zk.PermAll))
+
+		if i == len(path) {
+			data = value
+		}
+		_, err := s.client.Create(newpath, data, 0, zk.WorldACL(zk.PermAll))
 		if err != nil {
 			// Skip if node already exists
 			if err != zk.ErrNodeExists {
@@ -121,9 +126,9 @@ func (s *Zookeeper) Put(key string, value []byte, opts *store.WriteOptions) erro
 
 	if !exists {
 		if opts != nil && opts.TTL > 0 {
-			s.createFullPath(store.SplitKey(strings.TrimSuffix(key, "/")), true)
+			s.createFullPath(store.SplitKey(strings.TrimSuffix(key, "/")), value, true)
 		} else {
-			s.createFullPath(store.SplitKey(strings.TrimSuffix(key, "/")), false)
+			s.createFullPath(store.SplitKey(strings.TrimSuffix(key, "/")), value, false)
 		}
 	}
 
@@ -213,18 +218,22 @@ func (s *Zookeeper) WatchTree(directory string, stopCh <-chan struct{}) (<-chan 
 		// on those keys
 		watchCh <- entries
 
+		var eventType zk.EventType
 		for {
 			_, _, eventCh, err := s.client.ChildrenW(s.normalize(directory))
 			if err != nil {
 				return
 			}
+
+			if eventType == zk.EventNodeChildrenChanged {
+				if entries, err = s.List(directory); err == nil {
+					watchCh <- entries
+				}
+			}
+
 			select {
 			case e := <-eventCh:
-				if e.Type == zk.EventNodeChildrenChanged {
-					if kv, err := s.List(directory); err == nil {
-						watchCh <- kv
-					}
-				}
+				eventType = e.Type // send event after watcher registered in next loop
 			case <-stopCh:
 				// There is no way to stop GetW so just quit
 				return
@@ -313,7 +322,7 @@ func (s *Zookeeper) AtomicPut(key string, value []byte, previous *store.KVPair, 
 				// Create the directory
 				parts := store.SplitKey(strings.TrimSuffix(key, "/"))
 				parts = parts[:len(parts)-1]
-				if err = s.createFullPath(parts, false); err != nil {
+				if err = s.createFullPath(parts, []byte{}, false); err != nil {
 					// Failed to create the directory.
 					return false, nil, err
 				}

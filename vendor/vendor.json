@@ -45,22 +45,25 @@
 			"revisionTime": "2017-01-30T18:14:55Z"
 		},
 		{
-			"origin": "gitlab.alipay-inc.com/acs/libkv",
+			"checksumSHA1": "iI+sxLi0ePLAhK3nhmcxZWlVHvY=",
+			"origin": "github.com/uniseraph/libkv",
 			"path": "github.com/docker/libkv",
-			"revision": "acs-patches",
-			"version": "acs-patches"
+			"revision": "1d8431073ae03cdaedb198a89722f3aab6d418ef",
+			"revisionTime": "2016-11-09T01:06:21Z"
 		},
 		{
-			"origin": "gitlab.alipay-inc.com/acs/libkv/store",
+			"checksumSHA1": "f0riXTSoNiWTnXkQCUtXC9TwouM=",
+			"origin": "github.com/uniseraph/libkv/store",
 			"path": "github.com/docker/libkv/store",
-			"revision": "acs-patches",
-			"version": "acs-patches"
+			"revision": "1d8431073ae03cdaedb198a89722f3aab6d418ef",
+			"revisionTime": "2016-11-09T01:06:21Z"
 		},
 		{
-			"origin": "gitlab.alipay-inc.com/acs/libkv/store/zookeeper",
+			"checksumSHA1": "NZ0fOC72L+0qjYZpGoKaiAWzINo=",
+			"origin": "github.com/uniseraph/libkv/store/zookeeper",
 			"path": "github.com/docker/libkv/store/zookeeper",
-			"revision": "acs-patches",
-			"version": "acs-patches"
+			"revision": "74e16526fe07d80315e6121bd2e784e4e9fee4a5",
+			"revisionTime": "2017-02-20T13:05:36Z"
 		},
 		{
 			"path": "github.com/docker/libnetwork",
