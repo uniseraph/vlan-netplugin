@@ -1,4 +1,6 @@
-vlan:
+version: '2'
+services:
+ vlan:
   image: omega/vlan-netplugin:0.1.0
   command: start
   net: host
@@ -6,9 +8,6 @@ vlan:
   pid : host
   environment:
     - "affinity:container!=*vlan*"
-    - NP_CLUSTER_STORE=zk://localhost:2181
-    - NP_ETH=bond0.22
-    - LOG_LEVEL=debug
   restart: always
   volumes:
     - /run/docker/plugins:/run/docker/plugins

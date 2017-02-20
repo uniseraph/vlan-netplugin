@@ -1,6 +1,5 @@
 SHELL = /bin/bash
 
-
 TARGET       = vlan-netplugin
 PROJECT_NAME = github.com/omega/vlan-netplugin
 
@@ -14,12 +13,8 @@ BUILD_IMAGE     = golang:1.7.5
 IMAGE_NAME = omega/vlan-netplugin
 REGISTRY = registry.cn-hangzhou.aliyuncs.com
 
-
-
-
 build:
 	docker run --rm -v $(shell pwd):/go/src/${PROJECT_NAME} -w /go/src/${PROJECT_NAME} ${BUILD_IMAGE} make local
-
 
 image:
 	cp -r contrib/builder/image IMAGEBUILD && cp bundles/${MAJOR_VERSION}/binary/${TARGET} IMAGEBUILD
@@ -40,9 +35,10 @@ push:
 	docker push ${REGISTRY}/${IMAGE_NAME}:${MAJOR_VERSION}
 
 run: build image
-	docker run -ti --rm -v $(shell pwd):$(shell pwd) -v /var/run/docker.sock:/var/run/docker.sock -w $(shell pwd) -e DOCKER_HOST=unix:///var/run/docker.sock docker/compose:1.9.0 up -d
+	docker run -ti --rm -v $(shell pwd):$(shell pwd) -v /var/run/docker.sock:/var/run/docker.sock -w $(shell pwd) -e DOCKER_HOST=unix:///var/run/docker.sock -e NP_CLUSTER_STORE=zk://localhost:2181/default -e NP_ETH=bond0.22 -e LOG_LEVEL=debug docker/compose:1.9.0 up -d
 
 default: build
-all: build image push run
+
+all: build image run
 
 .PHONY: build local image push
