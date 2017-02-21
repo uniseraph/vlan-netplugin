@@ -4,7 +4,7 @@ vlan-netplugin 提供了libnetwork的VLAN/VXLAN模式。
 
 ## Prerequisite
 
-* 本文档所示示例均在Docker-1.9.0下完成，请保证Docker版本>=1.9.0（*不支持Docker 1.8 experimental*）
+* 本文档所示示例均在Docker-1.12下完成，请保证Docker版本>=1.12
 
 * 示例所需Docker环境均需要运行在集群模式下，即Docker daemon启动时需要添加
 
