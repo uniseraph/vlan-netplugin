@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/go-plugins-helpers/network"
+	"github.com/docker/libnetwork/netlabel"
 	"net"
 	"strconv"
 )
@@ -21,16 +22,16 @@ type Endpoint struct {
 }
 
 func (n *Network) VlanId() (vlanId int, err error) {
-	const netlabel = "com.docker.network.generic"
+	//const netlabel = "com.docker.network.generic"
 
 	if n.Options == nil {
 		return 0, errVlanIdRequired
 	}
-	if _, exists := n.Options[netlabel]; !exists {
+	if _, exists := n.Options[netlabel.GenericData]; !exists {
 		return 0, errVlanIdRequired
 	}
 
-	genericOpt, ok := n.Options[netlabel].(map[string]interface{})
+	genericOpt, ok := n.Options[netlabel.GenericData].(map[string]interface{})
 	if !ok {
 		return 0, errVlanIdRequired
 	}
