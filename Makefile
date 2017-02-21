@@ -16,6 +16,10 @@ REGISTRY = registry.cn-hangzhou.aliyuncs.com
 CLUSTER_STORE = zk://localhost:2181
 TRUNK_DEV     = eth0
 
+pull:
+	git pull
+
+
 build:
 	docker run --rm -v $(shell pwd):/go/src/${PROJECT_NAME} -w /go/src/${PROJECT_NAME} ${BUILD_IMAGE} make local
 
@@ -42,6 +46,6 @@ run: build image
 
 default: build
 
-all: build image run
+all: pull build image run
 
 .PHONY: build local image push
